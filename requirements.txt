@@ -1,0 +1,4 @@
+python==3.8
+pandas==1.4.0
+requests==2.26.0
+scikit-learn==1.0
