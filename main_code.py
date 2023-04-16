@@ -1,19 +1,54 @@
+from tkinter import TRUE
 import pandas as pd
-import requests
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 import sys
+import os
+from datetime import datetime, timedelta
+
+# Calculate the time range for the API URL (last 30 days)
+end_date = datetime.now()
+start_date = end_date - timedelta(days=30)
+period1 = int(start_date.timestamp())
+period2 = int(end_date.timestamp())
+import requests
+import urllib.request
+from urllib.error import HTTPError
+
+print("if you want to know stock symbols like AAPL(apple) got this link: https://business.unl.edu/outreach/econ-ed/nebraska-council-on-economic-education/student-programs/stock-market-game/documents/Top%202000%20Valued%20Companies%20with%20Ticker%20Symbols.pdf")
+csv = input("Please Enter Which Stock You Would Like To Know About (ex. type AAPL(apple)): ")
 
 # Fetch data from Yahoo Finance API
-print('Fetching data...')
-url = "https://query1.finance.yahoo.com/v7/finance/download/AAPL?period1=1649050272&period2=1680586272&interval=1d&events=history&includeAdjustedClose=true"
-response = requests.get(url)
+while True:
+    # Fetch data from Yahoo Finance API
+    print('Fetching data...')
+    url = f"https://query1.finance.yahoo.com/v7/finance/download/{csv}?period1={period1}&period2={period2}&interval=1d&events=history&includeAdjustedClose=true"
+    print(url)
+    try:
+        response = urllib.request.urlopen(url)
+    except HTTPError as e:
+        if e.code == 404:
+            print("HTTP error 404: The requested page was not found on the server.")
+        else:
+            print(f"HTTP error {e.code}: {e.reason}")
+    else:
+        print("The page was found.")
+    # Read the CSV file directly from the URL into a DataFrame
+    response = requests.get(url)
+    if response.status_code == 404:
+        print('404 error: Page not found. PLEASE TYPE ACTUAL SYMBOL LIKE AAPL (apple)')
+        csv = input("Please Enter Which Stock You Would Like To Know About (ex. type AAPL(apple)): ")
+    else:
+        print('Page found.')
+        break
 
 # Read the CSV file directly from the URL into a DataFrame
+    
+
 df = pd.read_csv(url)
-print("loading aapl-csv from yahoo...")
+print("loading csv from yahoo...")
 
 # Add a column to the DataFrame that predicts the percentage change in stock prices from one day to the next
 df['Daily % Change'] = (df['Close'].pct_change() * 100).round(2)
@@ -83,5 +118,14 @@ print()
 print("(DON'T ACTUALLY USE THIS FOR STOCK MARKETING BUT THIS IS A DEMONSTRATION OF A STOCK MARKET BOT)")
 print("A PROJECT BY RITHIN.R, PLEASE HELP ME GET TO TOP 3")
 print()
-input("Press Enter to EXIT...")
-sys.exit()
+while True:
+
+    restart = input("Do you wish to try again y/n (it will exit if you type n): ")
+    if(restart == "y"):
+        python = sys.executable
+        os.execl(python, python, *sys.argv)
+        sys.exit()
+    elif(restart == "n"):
+        sys.exit()
+    else:
+        print("type either y or n")
